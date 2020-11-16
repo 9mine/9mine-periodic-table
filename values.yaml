@@ -1,28 +1,11 @@
-replicaCount: 1
-
 image:
   repository: dievri/9mine-periodic-table
   pullPolicy: Always
   tag: "master"
 
-serviceAccount:
-  create: false
-
-securityContext: 
-  privileged: true
-  capabilities:
-    add:
-      - SYS_ADMIN
-
 service:
   type: ClusterIP
   port: 1917
-
-autoscaling:
-  enabled: false
-
-ingress:
-  enabled: false
 
 fs: |
   {% include './common.j2' %}
