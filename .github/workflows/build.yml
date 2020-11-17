@@ -11,14 +11,17 @@ jobs:
       - name: Docker Layer Caching
         uses: satackey/action-docker-layer-caching@v0.0.8
 
+      - run: echo ::set-env name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $2}' | sed -e "s/:refs//")
+        shell: bash
+
       - name: build image
-        run: docker build -t ${{ secrets.REGISTRY_USERNAME }}/${{ github.repository }}:${GITHUB_REF##*/} .
+        run: docker build -t ${{ secrets.REGISTRY_USERNAME }}/$REPOSITORY_NAME:${GITHUB_REF##*/} .
 
       - name: login to hub.docker.com
         run: docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: push image to registry
-        run: docker image push ${{ secrets.REGISTRY_USERNAME }}/${{ github.repository }}:${GITHUB_REF##*/}
+        run: docker image push ${{ secrets.REGISTRY_USERNAME }}/$REPOSITORY_NAME:${GITHUB_REF##*/}
       
       - name: Notify Telegram
         uses: yanzay/notify-telegram@v0.1.0
