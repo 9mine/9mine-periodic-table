@@ -2,7 +2,7 @@ replicaCount: 1
 
 image: 
   repository: dievri/9mine-periodic-table
-  tag: "feature_lua_handelrs"
+  tag: "feature_lua_handlers"
   pullPolicy: Always
 
 initContainerImage:
