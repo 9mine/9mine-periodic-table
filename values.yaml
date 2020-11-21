@@ -1,12 +1,12 @@
 replicaCount: 1
 
 image: 
-  repository: diervi/9mine-periodic-table
+  repository: dievri/9mine-periodic-table
   tag: "feature_lua_handelrs"
   pullPolicy: Always
 
 initContainerImage:
-  repository: dievri/9p-execfuse-jinja2
+  repository: dievri/execfuse-jinja2
   tag: "feature_lua_handlers"
   pullPolicy: Always
 
