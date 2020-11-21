@@ -1,11 +1,35 @@
-image:
+replicaCount: 1
+
+image: 
   repository: dievri/9mine-periodic-table
+  tag: "feature_lua_handlers"
   pullPolicy: Always
-  tag: "master"
+
+initContainerImage:
+  repository: dievri/execfuse-jinja2
+  tag: "feature_lua_handlers"
+  pullPolicy: Always
+
+serviceAccount:
+  create: false
+
+securityContext: 
+  privileged: true
+  capabilities:
+    add:
+      - SYS_ADMIN
 
 service:
   type: ClusterIP
   port: 1917
+
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: false
+
+description: "9mine periodic table module" 
 
 fs: |
   {% include './common.j2' %}
@@ -14,22 +38,48 @@ fs: |
   fs:
     "/":                                                    
       cache: 3600 #in second
-      readdir: lynx -nonumbers -dump -width 256 https://en.wikipedia.org/wiki/List_of_chemical_elements | grep -E '^   [0-9]+ [A-Z]' | awk '{print $2}'
-      getattr: *dir
-      "/[^/]+": #                                           # /<element_name>
+      readdir: 
+        sh: |
+          lynx -nonumbers -dump -width 256 https://en.wikipedia.org/wiki/List_of_chemical_elements | grep -E '^   [0-9]+ [A-Z]' | awk '{print $2}'
+        lua: print(".readdir.lua /")
+      getattr: 
+        sh: *dir
+        lua: print(".getattr.lua /")
+      "/[A-Za-z]+": #                                           # /<element_name>
         cache: 3600000 #in second
         name: element_name
-        getattr: *dir
+        getattr: 
+          sh: *dir
+          lua: print(".getattr.lua /<element_name>")
         readdir: 
-          - name
-          - density
-          - melt
-          - number
-          - period
-          - phase
-          - image
-        "/[a-z]+$":
+          list:
+            - name
+            - density
+            - melt
+            - number
+            - period
+            - phase
+            - image
+          lua: print(".readdir.lua /<element_name>")
+  
+        "/image":
+          cache: 9600 # in seconds
+          read_file: 
+            sh: |
+              URL=`curl https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/periodic-table-lookup.json | jq -r '.[] | select(.symbol? and .symbol == "'${element_name}'").image'`
+              curl -o ${URL}
+            lua: print(".read_file.lua /<element_name>/<property>")
+          getattr: 
+            sh: *file
+            lua: print(".getattr.lua /<element_name>/<property>") 
+              
+  
+        "/[a-z]+":
           cache: 9600 # in seconds
           name: element_property
-          read_file: curl https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/periodic-table-lookup.json | jq -r '.[] | select(.symbol? and .symbol == "'${element_name}'").'${element_property}
-          getattr: *file
+          read_file: 
+            sh: curl https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/periodic-table-lookup.json | jq -r '.[] | select(.symbol? and .symbol == "'${element_name}'").'${element_property}
+            lua: print(".read_file.lua")
+          getattr: 
+            sh: *file
+            lua: print(".getattr.lua")
