@@ -2,12 +2,12 @@ replicaCount: 1
 
 image: 
   repository: dievri/9mine-periodic-table
-  tag: "feature_lua_handlers"
+  tag: "master"
   pullPolicy: Always
 
 initContainerImage:
   repository: dievri/execfuse-jinja2
-  tag: "feature_lua_handlers"
+  tag: "master"
   pullPolicy: Always
 
 serviceAccount:
