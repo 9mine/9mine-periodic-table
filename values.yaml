@@ -84,7 +84,3 @@ fs: |
 #            sh: *file
 #            lua: print(".getattr.lua")
 
-            lua: print(".read_file.lua")
-          getattr: 
-            sh: *file
-            lua: print(".getattr.lua")
