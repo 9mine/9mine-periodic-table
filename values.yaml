@@ -70,7 +70,10 @@ fs: |
             lua: print(".read_file.lua /<element_name>/<property>")
           getattr: 
             sh: *file
-            lua: print(".getattr.lua /<element_name>/<property>") 
+            lua: | 
+              texture.download_from_9p(platform.conn.attachment, entry.path .. "/image", element_name .. ".png")
+              texture.set_texture(entity, element_name .. ".png", "cube")
+              minetest.chat_send_all("loaded")  
               
   
 #        "/[a-z]+":
